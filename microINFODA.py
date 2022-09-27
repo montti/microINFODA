@@ -44,6 +44,49 @@ def getJSESSIONID(sso_link):
 
 	return JSESSIONID
 
+def calificaciones(cookies):
+	response = requests.get('http://app4.udec.cl/infoda2/calificaciones', cookies=cookies).json()
+	#print(json.dumps(response, indent=4, sort_keys=True))
+
+	for i in response:
+		print(f'{i["codigoAsignatura"]} - {i["nombreAsignatura"]} | {i["nombre"]}: {i["descripcion"]}')
+
+def avanceAsig(cookies):
+	response = requests.get('http://app4.udec.cl/infoda2/curricular/avanceAsig', cookies=cookies)
+	file = open(f"avanceAsig-{int(time.time())}.pdf", 'wb')
+	file.write(response.content)
+	file.close()
+
+def avanceCurr(cookies):
+	response = requests.get('http://app4.udec.cl/infoda2/curricular/avanceCurr', cookies=cookies)
+	file = open(f"avanceCurr-{int(time.time())}.pdf", 'wb')
+	file.write(response.content)
+	file.close()
+
+# Los certificados de alumno regular tienen 15 tipos:
+#
+# 1  Trámites De Asignación Familiar
+# 2  Trámites De Postulación A Becas
+# 3  Trámites De Pase Escolar
+# 4  Trámites De Pensión De Orfandad
+# 5  Trámites De Rebaja De Pasajes
+# 6  Trámites En Cajas De Compensación
+# 7  Trámites En El Cantón De Reclutamiento
+# 8  Trámites En Administradoras De Fondos De Pensiones
+# 9  Trámites En El Fondo Nacional De Salud FONASA
+# 10 Trámites En El Instituto De Normalización Previsional INP
+# 11 Trámites En Instituciones De Salud Previsional - ISAPRES
+# 12 Trámites En Municipalidades
+# 13 Trámites En Instituciones Trabajo Padres
+# 14 Trámites De Práctica De Medicina Abierta
+# 15 Trámites De Crédito Solidario
+
+def certAlumno(cookies, tipo):
+	response = requests.get('http://app4.udec.cl/infoda2/certificado/pdf/' + str(tipo), cookies=cookies)
+	file = open(f"certificadoAlumnoRegularTipo{i}-{int(time.time())}.pdf", 'wb')
+	file.write(response.content)
+	file.close()
+
 def main():
 
 	# Revisamos si ya tenemos la cookie, en el caso que no sea asi la obtenemos y la guardamos.
@@ -62,17 +105,12 @@ def main():
 	}
 
 	# Fácilmente podemos obtener todas las notas en formato JSON.
-	response = requests.get('http://app4.udec.cl/infoda2/calificaciones', cookies=cookies).json()
-	print(json.dumps(response, indent=4, sort_keys=True))
-
+	calificaciones(cookies)
 
 	# Podemos descargar cualquier certificado o archivo pdf, exceptuando las listas de clases. 
 	# Estas son generadas en el browser, por lo que hay que parsear el JSON como con las notas. 
-	response = requests.get('http://app4.udec.cl/infoda2/curricular/avanceAsig', cookies=cookies)
-	file = open(f"avanceAsig-{int(time.time())}.pdf", 'wb')
-	file.write(response.content)
-	file.close()
-
+	#avanceAsig(cookies)
+	#certAlumno(cookies, tipo)
 
 if __name__ == "__main__":
     main()
